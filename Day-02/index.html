@@ -1,0 +1,99 @@
+<!-- Basic, HRA, DA, Tax  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Salary Calculator</title>
+	<style>
+		.field{
+			margin-bottom: 10px;
+		}
+		label{
+			display: block;
+		}
+		#divResult{
+			color : red;
+			font-size: 22pt;
+		}
+
+	</style>
+	<script src="react.js"></script>
+	<script src="react-dom.js"></script>
+	<script src="browser.min.js"></script>
+	<script>
+		String.prototype.toInt = function(){
+			return parseInt(this,10);
+		}
+	</script>
+	<script type="text/babel">
+		var SalaryCalculator = React.createClass({
+			getInitialState : function(){
+				return {
+					basic : 0,
+					hra :0,
+					da : 0,
+					tax : 0,
+					salary : 0,
+					calculate : function(){
+						var gross = this.basic + this.hra + this.da;
+						var net = gross * ((100-this.tax)/100);
+						this.salary = net;
+					}
+				}
+			},
+			onCalculateClick : function(){
+				this.state.calculate();
+				this.setState({});
+			},
+			onBasicChange : function(){
+				this.setState({'basic' : this.refs.txtBasic.value.toInt()});
+			},
+			onHraChange : function(){
+				this.setState({'hra' : this.refs.txtHra.value.toInt()});
+			},
+			onDaChange : function(){
+				this.setState({'da' : this.refs.txtDa.value.toInt()});
+			},
+			onTaxChange : function(){
+				this.setState({'tax' : this.refs.rangeTax.value.toInt()});
+			},
+			render : function(){
+				return (
+					<div class="content">
+						<div className="field">
+							<label>Basic :</label>
+							<input type="text" ref="txtBasic"  onChange={this.onBasicChange}/>
+						</div>
+						<div className="field">
+							<label>HRA :</label>
+							<input type="text" ref="txtHra" onChange={this.onHraChange}/>
+						</div>
+						<div className="field">
+							<label>DA :</label>
+							<input type="text" ref="txtDa" onChange={this.onDaChange}/>
+						</div>
+						<div className="field">
+							<label>Tax :</label>
+							<input type="range" ref="rangeTax" min="0" max="30" onChange={this.onTaxChange}/>
+							<span ref="spanTax">{this.state.tax}</span>
+						</div>
+						<div className="field">
+							<input type="button" value="Calculate" ref="btnCalculate" onClick={this.onCalculateClick} />
+						</div>
+						<div className="field">
+							<div ref="divResult">{this.state.salary}</div>
+						</div>
+					</div>
+				)
+			}
+		});
+		ReactDOM.render(<SalaryCalculator></SalaryCalculator>, document.getElementById('calculator'));
+	</script>
+</head>
+<body>
+	<h1>Salary Calculator</h1>
+	<hr>
+	<div id="calculator"></div>
+</body>
+</html>
