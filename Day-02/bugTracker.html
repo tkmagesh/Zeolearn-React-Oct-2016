@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Bug Tracker</title>
+	<style>
+		section{
+			margin-bottom: 10px;
+		}
+		ol{
+			width: 500px;
+			list-style: none;
+		}
+		li{
+			margin-bottom: 5px;
+			border-radius: 5px;
+			padding: 10px;
+			font-size: 18pt;
+			border : 1px solid gray;
+			background-color: #e7e7e7;
+			cursor: pointer;
+		}
+		.stats{
+			font-size: 18pt;
+		}
+		.closed{
+			color : red;
+			text-decoration : line-through;
+		}
+	</style>
+	<script src="react.js"></script>
+	<script src="react-dom.js"></script>
+	<script src="browser.min.js"></script>
+
+	<script src="jquery-1.12.4.js"></script>
+	<script type="text/babel">
+		function Bug(id, name, isClosed){
+			this.id = id;
+			this.name = name;
+			this.isClosed =  isClosed || false;
+		}
+
+		function Bugs(){
+			this.list = [];
+			var currentId = 0;
+			this.addNew = function(bugName, isClosed){
+				var newBug = new Bug(++currentId, bugName, isClosed);
+				this.list.push(newBug);
+				triggerCallbacksFor('any');
+			};
+
+			this.removeClosed = function(){
+				for(var i=this.list.length-1; i >= 0; i--)
+					if (this.list[i].isClosed)
+						this.list.splice(i,1);
+				triggerCallbacksFor('any');
+			};
+
+			function triggerCallbacksFor(attrName){
+				var callbackFns = _eventHandlers[attrName];
+				callbackFns.forEach(function(callbackFn){
+					if (typeof callbackFn === 'function')
+						callbackFn();
+				});
+			}
+			var _eventHandlers = {
+				
+				any : []
+			};
+
+			this.subscribe = function(attrName, callbackFn){
+				_eventHandlers[attrName].push(callbackFn);
+			}
+		}
+
+
+		var BugTracker = React.createClass({
+			onBtnAddClick : function(){
+				var newBugName = this.refs.txtBugName.value;
+				this.props.bugs.addNew(newBugName);
+				console.table(this.props.bugs.list);
+			},
+			onBtnRemoveClosedClick : function(){
+				this.props.bugs.removeClosed();
+			},
+
+			render : function(){
+				var list = this.props.bugs.list;
+				var closedCount = list.reduce((result, bug) => bug.isClosed ? ++result : result, 0);
+				var bugList = list.map(bug => {
+					if (bug.isClosed) return(<li key={bug.id} className="closed">{bug.name}</li>);
+					return(<li key={bug.id}>{bug.name}</li>);
+				});
+
+				return (
+					<div className="content">
+						<section className="stats">
+							<span className="closed">{closedCount}</span>
+							<span> / </span>
+							<span>{list.length}</span>
+						</section>
+						<section className="edit">
+							<label htmlFor="">Bug :</label>
+							<input type="text" ref="txtBugName" />
+							<input type="button" value="Add New" id="btnAdd" onClick={this.onBtnAddClick}/>
+						</section>
+						<section className="list">
+							<ol>
+								{bugList}
+							</ol>
+							<input type="button" value="Remove Closed" onClick={this.onBtnRemoveClosedClick}/>
+						</section>
+					</div>
+				);
+			}
+		});
+		var bugs = new Bugs();
+		bugs.addNew('Data validation failure', true);
+		bugs.addNew('Server communication disrupted', false);
+		bugs.addNew('User actions not recognized', false);
+		function reRender(){
+			ReactDOM.render(<BugTracker bugs={bugs}></BugTracker>, document.getElementById("view"));
+		}
+		bugs.subscribe('any', reRender);
+		reRender();
+	</script>
+</head>
+<body>
+	<h1>Bug Tracker</h1>
+	<hr>
+	<div id="view"></div>
+</body>
+</html>
