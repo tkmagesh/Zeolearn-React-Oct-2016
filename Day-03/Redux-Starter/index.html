@@ -3,9 +3,63 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Redux - starter</title>
+	<script src="browser.min.js"></script>
+	<script src="react.js"></script>
+	<script src="react-dom.js"></script>
 	<script src="redux.js"></script>
+	<script type="text/babel">
+		//State
+		var counterReducer = function(state = 0, action){
+			switch(action.type){
+				case 'INCREMENT':
+					return ++state;
+					break;
+				case  'DECREMENT':
+					return --state;
+					break;
+				default :
+					return state;
+			}
+		};
+		var store = Redux.createStore(counterReducer);
+	
+
+		//UI
+		var Counter = React.createClass({
+			render : function(){
+				return (
+				<div>
+					<h1>Counter</h1>
+					<div>
+						<input type="button" value="Decrement" onClick={this.props.onDecrement} />
+						<span>{this.props.data}</span>
+						<input type="button" value="Increment" onClick={this.props.onIncrement} />
+					</div>
+				</div>
+				);
+			}
+		});
+
+		function render(store){
+			var state = store.getState();
+			var triggerIncrement = function(){
+				store.dispatch({type : 'INCREMENT'});
+			};
+
+			var triggerDecrement = function(){
+				store.dispatch({type : 'DECREMENT'});
+			};
+
+			ReactDOM.render(<Counter data={state} onIncrement={triggerIncrement} onDecrement={triggerDecrement}></Counter>, document.getElementById("content"));
+		}
+
+		store.subscribe(function(){
+			render(store);
+		});
+		render(store);
+	</script>
 </head>
 <body>
-	
+	<div id="content"></div>
 </body>
 </html>
