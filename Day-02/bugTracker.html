@@ -39,6 +39,9 @@
 			this.name = name;
 			this.isClosed =  isClosed || false;
 		}
+		Bug.prototype.toggle = function(){
+			this.isClosed = !this.isClosed;
+		}
 
 		function Bugs(){
 			this.list = [];
@@ -64,7 +67,6 @@
 				});
 			}
 			var _eventHandlers = {
-				
 				any : []
 			};
 
@@ -87,10 +89,7 @@
 			render : function(){
 				var list = this.props.bugs.list;
 				var closedCount = list.reduce((result, bug) => bug.isClosed ? ++result : result, 0);
-				var bugList = list.map(bug => {
-					if (bug.isClosed) return(<li key={bug.id} className="closed">{bug.name}</li>);
-					return(<li key={bug.id}>{bug.name}</li>);
-				});
+				var bugList = list.map(bug => <BugView bug={bug} key={bug.id}></BugView>);
 
 				return (
 					<div className="content">
@@ -114,7 +113,19 @@
 				);
 			}
 		});
-		var bugs = new Bugs();
+
+		var BugView = React.createClass({
+			itemClick:function(){
+				this.props.bug.toggle();
+			},
+			render : function(){
+				var bug = this.props.bug;
+				var cssName = bug.isClosed ? "closed" : "";
+				return <li className={cssName} onClick={this.itemClick}>{bug.name}</li>;
+			}
+		});
+
+		window.bugs = new Bugs();
 		bugs.addNew('Data validation failure', true);
 		bugs.addNew('Server communication disrupted', false);
 		bugs.addNew('User actions not recognized', false);

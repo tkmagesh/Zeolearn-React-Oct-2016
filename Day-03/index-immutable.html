@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Immutable Demo</title>
+	<script src="browser.min.js"></script>
+	<script src="react.js"></script>
+	<script src="react-dom.js"></script>
+	<script src="jquery-1.12.4.js"></script>
+	<script src="immutable.min.js"></script>
+
+	<script type="text/babel">
+		var Greeting = React.createClass({
+			render : function(){
+				return (
+					<div>
+					<h1>{this.props.message.msg}</h1>
+					<div>{this.props.message.name}</div>
+					</div>
+				);
+			}
+		});
+
+		$(function(){
+			
+			
+			$("#btnGreetjQuery").click(function(){
+				$("#content-jquery").html("<h2>Welcome to react [jQuery]</h2>");
+			})
+
+			var data = {
+				name : 'Magesh',
+				msg : 'Welcome at ' + new Date().toString()
+			};
+			
+			$("#btnGreetReact").click(function(){
+				console.log(data);
+				var newData = {
+					name : data.name,
+					msg : 'Welcome at ' + new Date().toString(),
+				}
+				var data = newData;
+				console.log(data);
+				ReactDOM.render(<Greeting message={data}></Greeting>, document.getElementById("content-react"));
+			});
+		});
+
+	</script>
+
+</head>
+<body>
+	<input type="button" value="Greet (jQuery)" id="btnGreetjQuery">
+	<h3>jQuery</h3>
+	<div id="content-jquery"></div>
+
+	<input type="button" value="Greet (React)" id="btnGreetReact">
+	<h3>React</h3>
+	<div id="content-react"></div>
+	
+
+</body>
+</html>
