@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Bug Tracker</title>
+	<style>
+		section{
+			margin-bottom: 10px;
+		}
+		ol{
+			width: 500px;
+			list-style: none;
+		}
+		li{
+			margin-bottom: 5px;
+			border-radius: 5px;
+			padding: 10px;
+			font-size: 18pt;
+			border : 1px solid gray;
+			background-color: #e7e7e7;
+			cursor: pointer;
+		}
+		.stats{
+			font-size: 18pt;
+		}
+		.closed{
+			color : red;
+			text-decoration : line-through;
+		}
+	</style>
+	<script src="react.js"></script>
+	<script src="react-dom.js"></script>
+	<script src="browser.min.js"></script>
+	<script src="redux.js"></script>
+	
+	<script type="text/babel">
+		//State
+		var bugsReducer = function(state = [], action){
+			switch (action.type){
+				case  'ADD_NEW' :
+					var newBugName = action.data.newBugName;
+					var newId = state.length ? state.reduce((result, bug) => {
+						return result > bug.id ? result : bug.id;
+					},0) + 1 : 1;
+					var newBug = {
+						id : newId,
+						name : newBugName,
+						isClosed : false
+					};
+					return state.concat([newBug]);
+					break;
+				case 'TOGGLE' :
+					return state.map(b => {
+						if (b.id == action.data.bug.id){
+							return Object.assign({}, action.data.bug, {isClosed : !action.data.bug.isClosed})
+						}
+						return b;
+					});
+					break;
+				case 'REMOVE_CLOSED' :
+					return state.filter(bug => !bug.isClosed);
+					break;
+				default :
+					return state;
+			}
+		}
+
+		var BugTracker = React.createClass({
+			onBtnAddClick : function(){
+				this.props.onAdd(this.refs.txtBugName.value);
+			},
+
+			render : function(){
+				
+				var closedCount = this.props.bugs.reduce((result, bug) => bug.isClosed ? ++result : result, 0);
+
+				var bugList = this.props.bugs.map(bug => 
+					<BugView bug={bug} key={bug.id} onToggle={this.props.onToggle}></BugView>
+				);
+
+				return (
+					<div className="content">
+						<section className="stats">
+							<span className="closed">{closedCount}</span>
+							<span> / </span>
+							<span>{this.props.bugs.length}</span>
+						</section>
+						<section className="edit">
+							<label htmlFor="">Bug :</label>
+							<input type="text" ref="txtBugName" />
+							<input type="button" value="Add New" id="btnAdd" onClick={this.onBtnAddClick}/>
+						</section>
+						<section className="list">
+							<ol>
+								{bugList}
+							</ol>
+							<input type="button" value="Remove Closed" onClick={this.props.onRemoveClosed}/>
+						</section>
+					</div>
+				);
+			}
+		});
+
+		var BugView = React.createClass({
+			itemClick:function(){
+				this.props.onToggle(this.props.bug);
+			},
+			render : function(){
+				var bug = this.props.bug;
+				var cssName = bug.isClosed ? "closed" : "";
+				return <li className={cssName} onClick={this.itemClick}>{bug.name}</li>;
+			}
+		});
+
+		window.store = Redux.createStore(bugsReducer);
+
+		function render(){
+			var state = store.getState();
+
+			function onNewBugAdd(bugName){
+				store.dispatch({ type : 'ADD_NEW', data : {
+					newBugName : bugName
+				}});
+			}
+
+			function onRemoveClosed(){
+				store.dispatch({type : 'REMOVE_CLOSED'});
+			}
+			function onToggle(bug){
+				store.dispatch({type : 'TOGGLE', data : {
+					bug : bug
+				}});
+			}
+			ReactDOM.render(<BugTracker bugs={state} onAdd={onNewBugAdd} onRemoveClosed={onRemoveClosed} onToggle={onToggle}></BugTracker>, document.getElementById("view"));
+		}
+		store.subscribe(render);
+		render();
+	</script>
+</head>
+<body>
+	<h1>Bug Tracker</h1>
+	<hr>
+	<div id="view"></div>
+</body>
+</html>

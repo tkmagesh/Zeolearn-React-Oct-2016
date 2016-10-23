@@ -42,6 +42,7 @@
 
 		function render(store){
 			var state = store.getState();
+
 			var triggerIncrement = function(){
 				store.dispatch({type : 'INCREMENT'});
 			};
@@ -50,7 +51,10 @@
 				store.dispatch({type : 'DECREMENT'});
 			};
 
-			ReactDOM.render(<Counter data={state} onIncrement={triggerIncrement} onDecrement={triggerDecrement}></Counter>, document.getElementById("content"));
+			ReactDOM.render(
+				<Counter data={state} onIncrement={triggerIncrement} onDecrement={triggerDecrement}></Counter>, 
+				document.getElementById("content")
+			);
 		}
 
 		store.subscribe(function(){
